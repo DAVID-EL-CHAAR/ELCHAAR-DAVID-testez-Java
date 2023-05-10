@@ -11,7 +11,15 @@ public class Ticket {
     private Date inTime;
     private Date outTime;
 
-    public int getId() {
+    public Ticket(String string, ParkingSpot parkingSpot2, Date inTime2) {
+		// TODO Auto-generated constructor stub
+	}
+
+	public Ticket() {
+		// TODO Auto-generated constructor stub
+	}
+
+	public int getId() {
         return id;
     }
 
@@ -58,4 +66,10 @@ public class Ticket {
     public void setOutTime(Date outTime) {
         this.outTime = outTime;
     }
+
+    public int getNbTicket() {
+        return getNbTicket();
+
+   }
+    
 }

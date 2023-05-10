@@ -13,7 +13,11 @@ public class ParkingSpot {
         this.isAvailable = isAvailable;
     }
 
-    public int getId() {
+    public ParkingSpot(String string, ParkingType car) {
+		// TODO Auto-generated constructor stub
+	}
+
+	public int getId() {
         return number;
     }
 

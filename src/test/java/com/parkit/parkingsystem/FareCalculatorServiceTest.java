@@ -5,6 +5,8 @@ import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.FareCalculatorService;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -189,12 +191,51 @@ public void calculateFareBikeWithLessThan30minutesParkingTime(){
     assertEquals(0, ticket.getPrice());
 }
 
+//Méthode de test qui vérifie le tarif avec réduction pour une voiture
+@Test
+public void calculateFareCarWithDiscount() {
+    // Création d'un ticket concernant une voiture avec une durée de 45 minutes
+    Ticket ticket = new Ticket();
+    ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+    ticket.setParkingSpot(parkingSpot);
+    Date inTime = new Date();
+    inTime.setTime(System.currentTimeMillis() - (45 * 60 * 1000));
+    Date outTime = new Date();
+    ticket.setInTime(inTime);
+    ticket.setOutTime(outTime);
 
+    // Appel de la méthode à tester avec le paramètre discount à true
+    double price = new FareCalculatorService().calculateFare(ticket, true);
 
+     // Calcul du prix attendu avec réduction pour une voiture avec une durée de 45 minutes
+     double expectedPrice = new FareCalculatorService().calculateFullFareCar(45) * 0.95;
 
+     // Vérification que le prix calculé est égal au prix attendu
+     assertEquals(expectedPrice, price, 0.01);
+}
 
+// Méthode de test qui vérifie le tarif avec réduction pour une moto
+@Test
+public void calculateFareBikeWithDiscount() {
+    // Création d'un ticket concernant une moto avec une durée de 45 minutes
+    Ticket ticket = new Ticket();
+    ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE, false);
+    ticket.setParkingSpot(parkingSpot);
+    Date inTime = new Date();
+    inTime.setTime(System.currentTimeMillis() - (45 * 60 * 1000));
+    Date outTime = new Date();
+    ticket.setInTime(inTime);
+    ticket.setOutTime(outTime);
 
+    // Appel de la méthode à tester avec le paramètre discount à true
+    double price = new FareCalculatorService().calculateFare(ticket, true);
 
+     // Calcul du prix attendu avec réduction pour une moto avec une durée de 45 minutes
+     double expectedPrice = new FareCalculatorService().calculateFullFareBike(45) * 0.95;
+
+     // Vérification que le prix calculé est égal au prix attendu
+     assertEquals(expectedPrice, price, 0.01);
+}
 
 
 }
