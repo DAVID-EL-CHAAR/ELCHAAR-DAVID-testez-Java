@@ -57,15 +57,28 @@ public class ParkingServiceTest {
     }
 
     @Test
-    public void processExitingVehicleTest(){
-        // mock the call to getNbTicket()
-        when(ticketDAO.getNbTicket(toString())).thenReturn(1);
+    public void processExitingVehicleTest() {
+        // Créer un objet ParkingSpot
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
 
-        parkingService.processExitingVehicle();
+        // Créer un objet Ticket
+        Date inTime = new Date();
+        Date outTime = new Date(inTime.getTime() + (2 * 60 * 60 * 1000)); // Durée de stationnement de 2 heures
+        Ticket ticket = new Ticket(parkingSpot, "ABC123", inTime);
+        ticket.setOutTime(outTime);
 
-        // verify that updateParking() was called once
-        verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
+        // Créer un objet ParkingService mock
+        ParkingService parkingServiceMock = Mockito.spy(new ParkingService(new ParkingSpotDAO(), new TicketDAO()));
+        Mockito.doReturn(ticket).when(parkingServiceMock).getTicket(anyString()); // Mock la méthode getTicket()
+        Mockito.doReturn(1).when(parkingServiceMock).getNbTicket(anyString()); // Mock la méthode getNbTicket()
+
+        // Appeler la méthode processExitingVehicle()
+        parkingServiceMock.processExitingVehicle();
+
+        // Vérifier que la méthode updateParking() de ParkingSpotDAO a été appelée une fois
+        verify(parkingServiceMock.getParkingSpotDAO(), Mockito.times(1)).updateParking(any(ParkingSpot.class));
     }
+
 
     @Test
     public void testProcessIncomingVehicle() throws Exception {

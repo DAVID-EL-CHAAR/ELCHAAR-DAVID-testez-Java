@@ -1,5 +1,7 @@
 package com.parkit.parkingsystem.model;
 
+import static org.mockito.ArgumentMatchers.anyString;
+
 import java.util.Calendar;
 import java.util.Date;
 
@@ -67,7 +69,7 @@ public class Ticket {
         this.outTime = outTime;
     }
 
-    public int getNbTicket() {
+    public int getNbTicket(anyString() {
         return getNbTicket();
 
    }
