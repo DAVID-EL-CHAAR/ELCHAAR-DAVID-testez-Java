@@ -49,10 +49,14 @@ public class FareCalculatorService {
         if (ticket.getOutTime().before(ticket.getInTime())) {
             throw new IllegalArgumentException("Out time is before in time");
         }
+        
+       
+        
         // On calcule la durée du ticket en minutes
         int duration = (int) ((ticket.getOutTime().getTime() - ticket.getInTime().getTime()) / 1000 / 60);
         // On initialise le prix à zéro
         double price = 0;
+       
         // On vérifie le type de véhicule du ticket
         switch (ticket.getParkingSpot().getParkingType()) {
             case CAR: {

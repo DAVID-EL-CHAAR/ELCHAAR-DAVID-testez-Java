@@ -1,7 +1,5 @@
 package com.parkit.parkingsystem.model;
 
-import static org.mockito.ArgumentMatchers.anyString;
-
 import java.util.Calendar;
 import java.util.Date;
 
@@ -13,15 +11,7 @@ public class Ticket {
     private Date inTime;
     private Date outTime;
 
-    public Ticket(String string, ParkingSpot parkingSpot2, Date inTime2) {
-		// TODO Auto-generated constructor stub
-	}
-
-	public Ticket() {
-		// TODO Auto-generated constructor stub
-	}
-
-	public int getId() {
+    public int getId() {
         return id;
     }
 
@@ -68,10 +58,4 @@ public class Ticket {
     public void setOutTime(Date outTime) {
         this.outTime = outTime;
     }
-
-    public int getNbTicket(anyString() {
-        return getNbTicket();
-
-   }
-    
 }

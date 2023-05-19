@@ -41,4 +41,7 @@ public class ParkingSpot {
         isAvailable = available;
     }
 
+    public String toString() {
+        return "ParkingSpot [id=" + getId() + ", parkingType=" + getParkingType() + ", isAvailable=" + isAvailable() + "]";
+    }
 }
