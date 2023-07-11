@@ -12,14 +12,20 @@ public class InputReaderUtil {
 
     public int readSelection() {
         try {
-            int input = Integer.parseInt(scan.nextLine());
-            return input;
-        }catch(Exception e){
+            String input = scan.nextLine();
+            if (input == null || input.trim().isEmpty()) {
+                System.out.println("Aucune entrée détectée. Veuillez entrer un nombre valide.");
+                return -1;
+            }
+            int number = Integer.parseInt(input);
+            return number;
+        } catch(Exception e) {
             logger.error("Error while reading user input from Shell", e);
             System.out.println("Error reading input. Please enter valid number for proceeding further");
             return -1;
         }
     }
+
 
     public String readVehicleRegistrationNumber() throws Exception {
         try {

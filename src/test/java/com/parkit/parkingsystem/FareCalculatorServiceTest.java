@@ -109,7 +109,10 @@ public class FareCalculatorServiceTest {
         assertEquals((0.75 * Fare.BIKE_RATE_PER_HOUR), calculatedPrice);
     }
 
-
+    /**
+     * Ce test vérifie que le tarif calculé pour une voiture garée moins d'une heure est correct
+     */
+    
     @Test
     public void calculateFareCarWithLessThanOneHourParkingTime(){
         Date inTime = new Date();
@@ -128,23 +131,10 @@ public class FareCalculatorServiceTest {
 
         assertEquals(expectedPrice, ticket.getPrice());
     }
-
-
-    /*
-    @Test
-    public void calculateFareCarWithMoreThanADayParkingTime(){
-        Date inTime = new Date();
-        inTime.setTime( System.currentTimeMillis() - (  24 * 60 * 60 * 1000) );//24 hours parking time should give 24 * parking fare per hour
-        Date outTime = new Date();
-        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR,false);
-
-        ticket.setInTime(inTime);
-        ticket.setOutTime(outTime);
-        ticket.setParkingSpot(parkingSpot);
-        fareCalculatorService.calculateFare(ticket);
-        assertEquals( (24 * Fare.CAR_RATE_PER_HOUR) , ticket.getPrice());
-    }
-*/
+    
+    /**
+     * Ce test vérifie que le tarif calculé pour une voiture garée plus d'une journée est correct
+     */
 
     @Test
     public void calculateFareCarWithMoreThanADayParkingTime(){
@@ -167,8 +157,12 @@ public class FareCalculatorServiceTest {
         assertEquals(expectedPrice, ticket.getPrice(), 0.01);
     }
 
-@Test
-public void calculateFareCarWithLessThan30minutesParkingTime(){
+    /**
+     * Ce test vérifie que le tarif calculé pour une voiture garée moins de 30 minutes est correct
+     */
+
+    @Test
+    public void calculateFareCarWithLessThan30minutesParkingTime(){
     // Créer un objet de type ParkingSpot pour une voiture
     ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR,false);
 
@@ -185,12 +179,19 @@ public void calculateFareCarWithLessThan30minutesParkingTime(){
 
     // Appeler la méthode calculateFare avec le ticket et vérifier que le prix est égal à 0
     FareCalculatorService fareCalculatorService = new FareCalculatorService();
-    fareCalculatorService.calculateFare(ticket);
-    assertEquals(0, ticket.getPrice());
+    double price = fareCalculatorService.calculateFare(ticket);
+    ticket.setPrice(price);
+    assertEquals(0, ticket.getPrice(), 0.0001);
 }
+    
+    
+    /**
+     * Ce test vérifie que le tarif calculé pour une moto garée moins de 30 minutes est correct
+     */
 
-@Test
-public void calculateFareBikeWithLessThan30minutesParkingTime(){
+   
+   @Test
+   public void calculateFareBikeWithLessThan30minutesParkingTime(){
     // Créer un objet de type ParkingSpot pour une moto
     ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE,false);
 
@@ -210,10 +211,14 @@ public void calculateFareBikeWithLessThan30minutesParkingTime(){
     fareCalculatorService.calculateFare(ticket);
     assertEquals(0, ticket.getPrice());
 }
+   
+   
+   /**
+    * Ce test vérifie que le tarif calculé avec réduction pour une voiture est correct
+    */
 
-//Méthode de test qui vérifie le tarif avec réduction pour une voiture
-@Test
-public void calculateFareCarWithDiscount() {
+    @Test
+    public void calculateFareCarWithDiscount() {
     // Création d'un ticket concernant une voiture avec une durée de 45 minutes
     Ticket ticket = new Ticket();
     ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
@@ -233,10 +238,14 @@ public void calculateFareCarWithDiscount() {
      // Vérification que le prix calculé est égal au prix attendu
      assertEquals(expectedPrice, price, 0.01);
 }
+   
+   /**
+    * *
+    * Ce test vérifie que le tarif calculé avec réduction pour une moto est correct
+    */
 
-// Méthode de test qui vérifie le tarif avec réduction pour une moto
-@Test
-public void calculateFareBikeWithDiscount() {
+   @Test
+   public void calculateFareBikeWithDiscount() {
     // Création d'un ticket concernant une moto avec une durée de 45 minutes
     Ticket ticket = new Ticket();
     ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE, false);

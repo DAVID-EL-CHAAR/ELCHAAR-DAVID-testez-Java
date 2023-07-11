@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ParkingSpotDAO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">parking-system</a> &gt; <a href="index.source.html" class="el_package">com.parkit.parkingsystem.dao</a> &gt; <span class="el_source">ParkingSpotDAO.java</span></div><h1>ParkingSpotDAO.java</h1><pre class="source lang-java linenums">package com.parkit.parkingsystem.dao;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ParkingSpotDAO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">parking-system</a> &gt; <a href="index.source.html" class="el_package">com.parkit.parkingsystem.dao</a> &gt; <span class="el_source">ParkingSpotDAO.java</span></div><h1>ParkingSpotDAO.java</h1><pre class="source lang-java linenums">package com.parkit.parkingsystem.dao;
 
 import com.parkit.parkingsystem.config.DataBaseConfig;
 import com.parkit.parkingsystem.constants.DBConstants;
@@ -54,6 +54,33 @@ import java.sql.ResultSet;
         }finally {
 <span class="fc" id="L55">            dataBaseConfig.closeConnection(con);</span>
         }
+    }
+    
+    public ParkingSpot getParkingSpot(int number) {
+<span class="fc" id="L60">        Connection con = null;</span>
+<span class="fc" id="L61">        ParkingSpot parkingSpot = null;</span>
+
+        try {
+<span class="fc" id="L64">            con = dataBaseConfig.getConnection();</span>
+<span class="fc" id="L65">            PreparedStatement ps = con.prepareStatement(&quot;SELECT * FROM parking WHERE PARKING_NUMBER = ?&quot;);</span>
+<span class="fc" id="L66">            ps.setInt(1, number);</span>
+<span class="fc" id="L67">            ResultSet rs = ps.executeQuery();</span>
+
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">            if (rs.next()) {</span>
+<span class="fc" id="L70">                ParkingType parkingType = ParkingType.valueOf(rs.getString(&quot;TYPE&quot;));</span>
+<span class="fc" id="L71">                boolean isAvailable = rs.getBoolean(&quot;AVAILABLE&quot;);</span>
+<span class="fc" id="L72">                parkingSpot = new ParkingSpot(number, parkingType, isAvailable);</span>
+            }
+
+<span class="fc" id="L75">            dataBaseConfig.closeResultSet(rs);</span>
+<span class="fc" id="L76">            dataBaseConfig.closePreparedStatement(ps);</span>
+<span class="pc" id="L77">        } catch (Exception ex) {</span>
+<span class="nc" id="L78">            logger.error(&quot;Error fetching parking spot&quot;, ex);</span>
+        } finally {
+<span class="fc" id="L80">            dataBaseConfig.closeConnection(con);</span>
+        }
+
+<span class="fc" id="L83">        return parkingSpot;</span>
     }
 
 }

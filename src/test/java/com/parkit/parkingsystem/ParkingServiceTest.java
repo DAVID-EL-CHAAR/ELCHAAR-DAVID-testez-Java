@@ -11,6 +11,7 @@ import com.parkit.parkingsystem.util.InputReaderUtil;
 
 import junit.framework.Assert;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +24,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,39 +50,27 @@ public class ParkingServiceTest {
     private static ParkingSpotDAO parkingSpotDAO;
     @Mock
     private static TicketDAO ticketDAO;
+    
+    @Captor
+    private ArgumentCaptor<ParkingSpot> parkingSpotCaptor;
      
+
+    @Mock
     private FareCalculatorService fareCalculatorService;
   
     
 
-   
+    private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
 
-  /*  @BeforeEach
-    private void setUpPerTest() {
-    	
-        try {
-            when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
-
-            ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR,false);
-            Ticket ticket = new Ticket();
-            ticket.setInTime(new Date(System.currentTimeMillis() - (60*60*1000)));
-            ticket.setParkingSpot(parkingSpot);
-            ticket.setVehicleRegNumber("ABCDEF");
-            lenient().when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
-            when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
-
-            when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
-
-            parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to set up test mock objects");
-        }
-    }
-  */
+    /**
+     * Cette méthode d'initialisation est exécutée avant chaque test.
+     * Elle initialise les objets simulés nécessaires pour les tests.
+     */
     
-    @BeforeEach
+    @SuppressWarnings("deprecation")
+	@BeforeEach
     private void setUpPerTest() {
+    	   MockitoAnnotations.initMocks(this);
         try {
             lenient().when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
 
@@ -92,147 +83,109 @@ public class ParkingServiceTest {
             lenient().when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
 
             lenient().when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
+            System.setOut(new PrintStream(outputStreamCaptor));
 
             parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to set up test mock objects");
+            throw new RuntimeException("Échec de la configuration des objets fictifs de test");
         }
     }
     
     
-    
-    @Test
-    public void processExitingVehicleTest(){
-        parkingService.processExitingVehicle();
-        verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
-        verify(ticketDAO, times(1)).getNbTicket(anyString()); //verifying the call of getNbTicket() method
+    /**
+     * Cette méthode est exécutée après chaque test.
+     * Elle rétablit le flux de sortie système par défaut.
+     */
+    @AfterEach
+    void tearDown() {
+        System.setOut(System.out);
     }
     
-   /*
+      
+    /**
+     * Ce test vérifie que la méthode processExitingVehicle du service de parking fonctionne correctement.
+     */
+    
     @Test
-    public void testProcessIncomingVehicle() throws Exception {
-        // arrange
-    	
-        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, true);
-        String vehicleRegNumber = "12345";
+    public void processExitingVehicleTest() {
+        try {
+            
+            String vehicleRegNumber = "ABCDEF";
+            when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(vehicleRegNumber);
 
-       
-           
-		   
-           // when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
+            ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+
+            Ticket ticket = spy(new Ticket()); 
+            ticket.setInTime(new Date(System.currentTimeMillis() - (60 * 60 * 1000)));
+            ticket.setParkingSpot(parkingSpot);
+            ticket.setVehicleRegNumber(vehicleRegNumber);
+            when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
+            when(ticketDAO.getNbTicket(anyString())).thenReturn(1);
+
             when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
-            when(ticketDAO.saveTicket(any(Ticket.class))).thenReturn(true);
-            when(parkingService.getNextParkingNumberIfAvailable()).thenReturn(parkingSpot);
-            when(parkingService.getVehichleRegNumber()).thenReturn(vehicleRegNumber);
 
-
-        // act
-          
-                parkingService.processIncomingVehicle();
-           
-        // assert
-       
+            parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
             
+
             
-            verify(parkingSpotDAO, times(1)).updateParking(any(ParkingSpot.class));
-            verify(ticketDAO, times(1)).saveTicket(any(Ticket.class));
-        
+            when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
+            parkingService.processExitingVehicle();
 
+            verify(ticketDAO, Mockito.times(1)).updateTicket(any(Ticket.class));
+            verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
+            verify(ticketDAO, Mockito.times(1)).getTicket(vehicleRegNumber);
+            verify(ticketDAO, Mockito.times(1)).getNbTicket(vehicleRegNumber);
+            verify(ticket, Mockito.times(1)).setOutTime(any(Date.class));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Echec de l'installation des objets mock");
+        }
     }
-    */
-    /*
-    @Test
-    public void testProcessIncomingVehicle() throws Exception {
-        // arrange
-        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, true);
 
-        // Mock the behaviour of inputReaderUtil's methods
-        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(VEHICLE_REG_NUMBER);
-        when(inputReaderUtil.readSelection()).thenReturn(1); // or any other integer value
-
-        // Mock the behaviour of DAO methods
-        when(parkingSpotDAO.updateParking(eq(parkingSpot))).thenReturn(true);
-        when(ticketDAO.saveTicket(any())).thenReturn(true);
-
-        // act
-        parkingService.processIncomingVehicle();
-
-        // assert
-        verify(parkingSpotDAO, times(1)).updateParking(eq(parkingSpot));
-        verify(ticketDAO, times(1)).saveTicket(any());
-    }
-   */
     
+    /**
+     * Ce test vérifie que la méthode processIncomingVehicle du service de parking fonctionne correctement.
+     */
   
-    
-    @Captor ArgumentCaptor<ParkingSpot> parkingSpotCaptor;
-
     @Test
     public void testProcessIncomingVehicle() throws Exception {
-        // arrange
-        // Initialize the ParkingService instance with the mock objects
+        // Arrange
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
 
-        // Mock the behaviour of inputReaderUtil's methods
         when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(VEHICLE_REG_NUMBER);
-        when(inputReaderUtil.readSelection()).thenReturn(1); // or any other integer value
+        when(inputReaderUtil.readSelection()).thenReturn(1); 
 
-        // Mock the behaviour of DAO methods
-        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1); // or any other integer value
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
         when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
         when(ticketDAO.saveTicket(any())).thenReturn(true);
 
-        // Create a parkingSpot with the expected slot number and type, and available set to false
-        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+        ParkingSpot expectedParkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
 
-        // Create a captor to capture the argument passed to updateParking()
-        ArgumentCaptor<ParkingSpot> parkingSpotCaptor = ArgumentCaptor.forClass(ParkingSpot.class);
-
-        // act
+        // Act
         parkingService.processIncomingVehicle();
 
-        // assert
+        // Assert
         verify(parkingSpotDAO, times(1)).updateParking(parkingSpotCaptor.capture());
         verify(ticketDAO, times(1)).saveTicket(any());
 
-        // Check if the captured argument is equal to the expected parkingSpot
         ParkingSpot capturedParkingSpot = parkingSpotCaptor.getValue();
-        assertEquals(parkingSpot.getId(), capturedParkingSpot.getId());
-        assertEquals(parkingSpot.getParkingType(), capturedParkingSpot.getParkingType());
-        assertEquals(parkingSpot.isAvailable(), capturedParkingSpot.isAvailable());
+        assertEquals(expectedParkingSpot.getId(), capturedParkingSpot.getId());
+        assertEquals(expectedParkingSpot.getParkingType(), capturedParkingSpot.getParkingType());
+        assertEquals(expectedParkingSpot.isAvailable(), capturedParkingSpot.isAvailable());
 
-        // Print the values of the two objects to compare them
-        System.out.println("Expected parking spot: " + parkingSpot.toString());
+        System.out.println("Expected parking spot: " + expectedParkingSpot.toString());
         System.out.println("Captured parking spot: " + capturedParkingSpot.toString());
     }
     
-
-    @Test
-    public void processExitingVehicleTestUnableUpdate() {
-        // arrange
-        String vehicleRegNumber = "ABC123";
-        Ticket ticket = new Ticket();
-        ticket.setVehicleRegNumber(vehicleRegNumber);
-        ticket.setPrice(10.0);
-        ticket.setOutTime(new Date());
-
-        // stub the methods of the mocks
-        
-    
-
-        // act
-        parkingService.processExitingVehicle();
-
-        // assert
-        assertEquals(10.0, ticket.getPrice()); // vérifier si le prix du ticket n'a pas changé
-    }
-    
-    
+    /**
+     * Ce test vérifie que la méthode getNextParkingNumberIfAvailable renvoie le bon numéro de parking si une place est disponible.
+     */
     @Test
     public void testGetNextParkingNumberIfAvailable() throws Exception {
         // arrange
-        when(inputReaderUtil.readSelection()).thenReturn(1); // simulates user selecting CAR
+        when(inputReaderUtil.readSelection()).thenReturn(1); 
         when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
 
         // act
@@ -243,12 +196,33 @@ public class ParkingServiceTest {
         assertEquals(true, parkingSpot.isAvailable());
     }
     
+    /**
+     * Ce test vérifie que l'exception est correctement levée lorsque la mise à jour du ticket échoue.
+     */
+    @Test
+    public void processExitingVehicleTestUpdateFails() {
+        // Arrange
+    	Ticket mockTicket = mock(Ticket.class);
+        
+        lenient().when(ticketDAO.getTicket(anyString())).thenReturn(mockTicket);
+        lenient().when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(false);  
+        
+        
+        
+        // Act and Assert
+        assertThrows(Exception.class, () -> parkingService.processExitingVehicle());
+    }
+
+    
+    /**
+     * Ce test vérifie que la méthode getNextParkingNumberIfAvailable retourne null si aucune place de parking n'est disponible.
+     */
     
     @Test
     public void testGetNextParkingNumberIfAvailableParkingNumberNotFound() throws Exception {
         // arrange
-        when(inputReaderUtil.readSelection()).thenReturn(1); // simulates user selecting CAR
-        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(0); // indicates no spot available
+        when(inputReaderUtil.readSelection()).thenReturn(1); 
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(0); 
 
         // act
         ParkingSpot parkingSpot = parkingService.getNextParkingNumberIfAvailable();
@@ -257,10 +231,14 @@ public class ParkingServiceTest {
         assertNull(parkingSpot);
     }
     
+    
+    /**
+     * Ce test vérifie que la méthode getNextParkingNumberIfAvailable retourne null si une option non valide est sélectionnée.
+     */
     @Test
     public void testGetNextParkingNumberIfAvailableParkingNumberWrongArgument() throws Exception {
         // arrange
-        when(inputReaderUtil.readSelection()).thenReturn(3); // simulates user selecting an invalid option
+        when(inputReaderUtil.readSelection()).thenReturn(3); 
 
         // act
         ParkingSpot parkingSpot = parkingService.getNextParkingNumberIfAvailable();
@@ -268,6 +246,7 @@ public class ParkingServiceTest {
         // assert
         assertNull(parkingSpot);
     }
+    
     
     
     

@@ -1,32 +1,90 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FareCalculatorService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">parking-system</a> &gt; <a href="index.source.html" class="el_package">com.parkit.parkingsystem.service</a> &gt; <span class="el_source">FareCalculatorService.java</span></div><h1>FareCalculatorService.java</h1><pre class="source lang-java linenums">package com.parkit.parkingsystem.service;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FareCalculatorService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">parking-system</a> &gt; <a href="index.source.html" class="el_package">com.parkit.parkingsystem.service</a> &gt; <span class="el_source">FareCalculatorService.java</span></div><h1>FareCalculatorService.java</h1><pre class="source lang-java linenums">package com.parkit.parkingsystem.service;
+
 
 import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.model.Ticket;
+import com.parkit.parkingsystem.constants.ParkingType;
 
-<span class="fc" id="L6">public class FareCalculatorService {</span>
+<span class="fc" id="L8">public class FareCalculatorService {</span>
 
-    public void calculateFare(Ticket ticket){
-<span class="pc bpc" id="L9" title="2 of 4 branches missed.">        if( (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime())) ){</span>
-<span class="nc" id="L10">            throw new IllegalArgumentException(&quot;Out time provided is incorrect:&quot;+ticket.getOutTime().toString());</span>
+	// Méthode qui calcule le tarif plein pour une voiture
+    public double calculateFullFareCar(int duration) {
+        // Tarif horaire pour une voiture
+<span class="fc" id="L13">        double fare = Fare.CAR_RATE_PER_HOUR;</span>
+        // Durée minimale de facturation
+<span class="fc" id="L15">        int minDuration = 30;</span>
+        // Si la durée est inférieure à la durée minimale, on applique le tarif minimal
+<span class="fc bfc" id="L17" title="All 2 branches covered.">        if (duration &lt;= minDuration) {</span>
+<span class="fc" id="L18">            return fare * minDuration / 60;</span>
         }
+        // Sinon, on applique le tarif proportionnel à la durée
+<span class="fc" id="L21">        return fare * duration / 60;</span>
+    }
 
-<span class="fc" id="L13">        int inHour = ticket.getInTime().getHours();</span>
-<span class="fc" id="L14">        int outHour = ticket.getOutTime().getHours();</span>
+    // Méthode qui calcule le tarif plein pour une moto
+    public double calculateFullFareBike(int duration) {
+        // Tarif horaire pour une moto
+<span class="fc" id="L27">        double fare = Fare.BIKE_RATE_PER_HOUR;</span>
+        // Durée minimale de facturation
+<span class="fc" id="L29">        int minDuration = 30;</span>
+        // Si la durée est inférieure à la durée minimale, on applique le tarif minimal
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        if (duration &lt;= minDuration) {</span>
+<span class="fc" id="L32">            return fare * minDuration / 60;</span>
+        }
+        // Sinon, on applique le tarif proportionnel à la durée
+<span class="fc" id="L35">        return fare * duration / 60;</span>
+    }
 
-        //TODO: Some tests are failing here. Need to check if this logic is correct
-<span class="fc" id="L17">        int duration = outHour - inHour;</span>
-
-<span class="pc bpc" id="L19" title="2 of 3 branches missed.">        switch (ticket.getParkingSpot().getParkingType()){</span>
+    // Méthode qui calcule le tarif avec réduction pour une voiture ou une moto
+    public double calculateFare(Ticket ticket, boolean discount) {
+        // Si le ticket est null, on lance une exception
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        if (ticket == null) {</span>
+<span class="nc" id="L42">            throw new IllegalArgumentException(&quot;Ticket is null&quot;);</span>
+        }
+        // Si le ticket n'a pas d'heure de sortie, on lance une exception
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">        if (ticket.getOutTime() == null) {</span>
+<span class="nc" id="L46">            throw new IllegalArgumentException(&quot;Out time is null&quot;);</span>
+        }
+        // Si le ticket a une heure de sortie antérieure à l'heure d'entrée, on lance une exception
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (ticket.getOutTime().before(ticket.getInTime())) {</span>
+<span class="fc" id="L50">            throw new IllegalArgumentException(&quot;Out time is before in time&quot;);</span>
+        }
+        
+       
+        
+        // On calcule la durée du ticket en minutes
+<span class="fc" id="L56">        int duration = (int) ((ticket.getOutTime().getTime() - ticket.getInTime().getTime()) / 1000 / 60);</span>
+        // On initialise le prix à zéro
+<span class="fc" id="L58">        double price = 0;</span>
+       
+        // On vérifie le type de véhicule du ticket
+<span class="pc bpc" id="L61" title="1 of 3 branches missed.">        switch (ticket.getParkingSpot().getParkingType()) {</span>
             case CAR: {
-<span class="fc" id="L21">                ticket.setPrice(duration * Fare.CAR_RATE_PER_HOUR);</span>
-<span class="fc" id="L22">                break;</span>
+                // On calcule le prix plein pour une voiture en appelant la méthode de la classe FareCalculatorService
+<span class="fc" id="L64">                price = calculateFullFareCar(duration);</span>
+<span class="fc" id="L65">                break;</span>
             }
             case BIKE: {
-<span class="nc" id="L25">                ticket.setPrice(duration * Fare.BIKE_RATE_PER_HOUR);</span>
-<span class="nc" id="L26">                break;</span>
+                // On calcule le prix plein pour une moto en appelant la méthode de la classe FareCalculatorService
+<span class="fc" id="L69">                price = calculateFullFareBike(duration);</span>
+<span class="fc" id="L70">                break;</span>
             }
-<span class="nc" id="L28">            default: throw new IllegalArgumentException(&quot;Unkown Parking Type&quot;);</span>
+<span class="nc" id="L72">            default: throw new IllegalArgumentException(&quot;Unknown Parking Type&quot;);</span>
         }
-<span class="fc" id="L30">    }</span>
+        // Si le paramètre discount est vrai, on applique une réduction de 5%
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        if (discount) {</span>
+<span class="fc" id="L76">            price = price * 0.95;</span>
+        }
+        // On arrondit le prix à deux décimales
+<span class="fc" id="L79">        price = Math.round(price * 100.0) / 100.0;</span>
+        // On retourne le prix calculé
+<span class="fc" id="L81">        return price;</span>
+    }
+
+    // Méthode qui calcule le tarif sans réduction pour une voiture ou une moto
+    public double calculateFare(Ticket ticket) {
+        // Appel de la méthode calculateFare avec le paramètre discount à false
+<span class="fc" id="L87">        return calculateFare(ticket, false);</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>
